@@ -1,0 +1,439 @@
+---
+title: "ggplot and maybe Xpose"
+author: "Irene Vuu"
+date: "7/10/2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(xpose4)
+```
+
+## getting started
+
+- install.packages("ggplot2")
+- install.packages("gridExtra")
+- library(ggplot2)
+- library(gridExtra)
+- library(dplyr)
+
+## ggplot language
+
+- your data are mapped to various aesthesics in a plot such as color, size, or position
+- geometric objects are what we see in the plot: the points/lines, scales, bars
+- think of plots as:
+data + stat transformation + geometric objects + scaling + labels
+
+```{r Theoph, echo = FALSE, warning=FALSE}
+df <- data.frame(Theoph)
+wt <- df %>%
+  group_by(df$Subject) %>%
+  summarise(WT=mean(Wt))
+  
+a <- ggplot(wt, aes(WT)) + geom_histogram()
+b <- ggplot(Theoph, aes(Time, conc, color=Subject)) + geom_line()
+c <- ggplot(Theoph, aes(Dose, Wt)) + geom_point(aes(color=Subject))
+```
+
+## histogram example
+```{r a, echo=FALSE, warning=FALSE}
+a
+```
+
+## spaghetti example
+```{r b, echo=FALSE}
+b
+```
+
+## dotplot example
+```{r c, echo=FALSE}
+c
+```
+
+## things needed for a plot
+
+1. a default dataset and set of mappings from variables to aesthetics,
+2. one or more layers, with each layer having one geometric object, one statistical transformation,
+3. one position adjustment, and optionally, one dataset and set of aesthetic mappings,
+4. one scale for each aesthetic mapping used,
+5. a coordinate system,
+6. the facet specification
+
+## lets start with the data component
+```{r theo}
+names(Theoph)
+```
+- df <- data.frame(Theoph)
+- ggplot(df,aes(Time,conc))
+```{r theoph df}
+ggplot(df,aes(Time,conc))
+```
+
+## adding on a geometric object
+- ggplot(df,aes(Time,conc)) + geom_point()
+```{r theoph point}
+ggplot(df,aes(Time,conc)) + geom_point()
+```
+
+## aesthetics with geom_point
+- alpha(transparency), shape, color, size
+- ggplot(df,aes(Time,conc)) + geom_point(alpha=0.2,size=5, color="blue")
+```{r theoph fancy point}
+ggplot(df,aes(Time,conc)) + geom_point(alpha=0.2, size=5, color="blue")
+```
+
+## or you could map to a variable
+- ggplot(df,aes(Time,conc)) + geom_point(alpha=0.5, size=1, aes(color=Subject))
+- ggplot(df,aes(Time,conc)) + geom_point(alpha=0.7, size=3, aes(color=Wt))
+```{r theoph fancy point2}
+d <- ggplot(df,aes(Time,conc)) + geom_point(alpha=0.5, size=1, aes(color=Subject))
+e <- ggplot(df,aes(Time,conc)) + geom_point(alpha=0.7, size=3, aes(color=Wt))
+grid.arrange(d,e,ncol=2)
+```
+
+## setting vs mapping
+- setting it is what we did first: geom_point(color="blue") 
+- vs geom_point(aes(color=Subject))
+- aes maps something to a variable in your dataset
+
+## can map in ggplot object too
+ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line()
+```{r in object}
+ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line()
+```
+
+## grouping
+The "group" argument allows you to map a group of factors
+ggplot(df,aes(Time,conc,group=Subject)) + geom_point(aes(size=Wt)) + geom_line(aes(color=Subject))
+```{r in object2}
+f <- ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line()
+g <- ggplot(df,aes(Time,conc,group=Subject)) + geom_point(aes(size=Wt),alpha=0.3) + geom_line(aes(color=Subject))
+grid.arrange(f,g,ncol=2)
+```
+
+## other good-to-knows
+- geom_bar: stat, linetype, fill (bar inside), color (bar outline), alpha, position = "fill/dodge"
+- geom_line: stat, linetype, color, alpha
+- geom_polygon: adds polygon, good for mapping
+- geom_text: adds labels to specific points
+- geom_smooth: adds a smoothed conditional means. default is loess if <1000 observations, gam otherwise
+- geom_tile: draws rectangles, good for heat maps
+
+## logarithmic scaling
+ggplot(df,aes(Time,conc,group=Subject)) + geom_point() + geom_line() + scale_y_log10()
+```{r log, warning=FALSE}
+ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line() + scale_y_log10()
+```
+
+## faceting
+adding facet_grid(.~Subject) if you want it separated by columns
+adding facet_grid(Subject~.) if you want it separated by rows
+```{r facet}
+h <- ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line() + facet_grid(.~Subject)
+i <- ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line() + facet_grid(Subject~.)
+grid.arrange(h,i,ncol=2)
+```
+
+## facet wrap
+adding facet_wrap(~Subject,ncol/nrow=x) likely better for larger n's
+```{r facet2}
+j <- ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line() + facet_wrap(~Subject,ncol=3)
+k <- ggplot(df,aes(Time,conc,color=Subject)) + geom_point() + geom_line() + facet_wrap(~Subject,nrow=3)
+grid.arrange(j,k,ncol=2)
+```
+
+## adding a second facet layer
+```{r facet layer, echo=TRUE}
+df2 <- df %>%
+  mutate(Category = if_else(Wt <= 65,
+                            "Less than or equal to 65 kg",
+                            "Greater than 65 kg"))
+ggplot(df2,aes(Time,conc))+geom_line()+facet_grid(Category~Subject)
+```
+
+## geom_smooth()
+by default will give you a non-parametric, Loess curve including standard error
+```{r smooth}
+l <- ggplot(df,aes(Time,conc))+geom_point()+geom_smooth(se=TRUE,method="loess")
+m <-ggplot(df,aes(Time,conc))+geom_point()+geom_line(aes(group=Subject),alpha=0.3)+geom_smooth(se=TRUE,method="loess")
+grid.arrange(l,m,nrow=2)
+```
+
+## other geom_smooth options
+Use span to control the "wiggliness" of the default loess smoother. The span is the fraction of points used to fit each local regression: small numbers make a wigglier curve, larger numbers make a smoother curve.
+```{r smooth2, warning=FALSE}
+n <- ggplot(df,aes(Time,conc))+geom_point()+geom_smooth(span=5, method="loess", se=FALSE)
+o <- ggplot(df,aes(Time,conc))+geom_point()+geom_smooth(span=0.3, method="loess", se=FALSE)
+p <- ggplot(df,aes(Time,conc))+geom_point()+geom_smooth(span=0.15, method="loess", se=FALSE)
+grid.arrange(n,o,p, nrow=3)
+```
+
+## other geom_smooth options, part 2
+you can also use method="lm" for a linear regression (option to use a formula) OR employ a binomial function by using method="glm",method.args=list(family="binomial")
+```{r smooth3, warning=FALSE}
+df3 <- df %>%
+  mutate(Heavy = if_else(Wt <= 65,0,1))
+q <- ggplot(df3,aes(Time, conc))+geom_point()+geom_smooth(method="lm", se=FALSE, aes(group=Heavy, color=as.factor(Heavy)))
+r <- ggplot(df3,aes(Dose,Heavy))+geom_point()+geom_smooth(method = "glm", method.args = list(family = "binomial"), se=FALSE)
+grid.arrange(q,r, nrow=2)
+```
+
+## trendplot with standard deviations
+using geom_ribbon() and geom_errorbar() to give you standard deviations
+```{r trend}
+avg <- df3 %>%
+  dplyr::group_by(Time) %>%
+  dplyr::summarise(AvgConc = mean(conc),
+                   SD=sd(conc))
+
+s <- ggplot(filter(avg, !is.na(SD)),aes(Time,AvgConc))+
+  geom_point()+
+  geom_line()+
+  geom_ribbon(aes(ymin=AvgConc-SD,ymax=AvgConc+SD),alpha=0.2)
+
+t <- ggplot(filter(avg, !is.na(SD)),aes(Time,AvgConc))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=AvgConc-SD,ymax=AvgConc+SD),
+                linetype=2,
+                size=0.5,
+                width=0.2)
+grid.arrange(s,t,nrow=2)
+```
+
+## multiple trendlines
+scale_y_continuous(name= "Primary Y", sec.axis = sec_axis(trans=~. XXX, name="Secondary Y"))
+```{r multiple, echo=TRUE, warning=FALSE}
+ggplot(df3, aes(Time,conc))+
+  geom_smooth(aes(colour="Central"),method="loess",se=FALSE)+
+  geom_smooth(aes(Time,y=(conc/10),colour="Gut"),method="loess",se=FALSE)+
+  scale_y_continuous(name="Central Concentration",sec.axis = sec_axis(trans = ~.*1, name = "Gut Concentration"))
+```
+
+## formatting
+```{r cars, echo=TRUE}
+cars <- data.frame(mtcars)
+ggplot(cars, aes(mpg, wt))+
+  geom_point()+
+  labs(title="Weight vs MPG",
+       subtitle="Correlation plot",
+       x="Miles per gallon",
+       y="Weight")
+```
+
+## more formatting tricks
+```{r more cars}
+k <- ggplot(cars, aes(mpg, wt, color=as.factor(cyl)))+
+  geom_point()+
+  labs(title="Weight vs MPG",
+       subtitle="Correlation plot",
+       x="Miles per gallon",
+       y="Weight")
+
+l <- ggplot(cars, aes(mpg, wt, color=as.factor(cyl)))+
+  geom_point()+
+  labs(title="Weight vs MPG",
+       subtitle="Correlation plot",
+       x="Miles per gallon",
+       y="Weight")+
+  scale_colour_manual(values=c("red", "blue", "black"),
+                      name="Cylinders",
+                      breaks=c("4", "6", "8"),
+                      labels=c("4 Cyl", "6 Cyl", "8 Cyl"))
+
+m <- ggplot(cars, aes(mpg, wt, shape=as.factor(cyl)))+
+  geom_point()+
+  labs(title="Weight vs MPG",
+       subtitle="Correlation plot",
+       x="Miles per gallon",
+       y="Weight")+
+  scale_shape_manual(values=c(2, 4, 6),
+                      name="Cylinders",
+                      breaks=c("4", "6", "8"),
+                      labels=c("4 Cyl", "6 Cyl", "8 Cyl"))
+
+n <- ggplot(cars, aes(mpg, wt, shape=as.factor(cyl)))+
+  geom_point()+
+  labs(title="Weight vs MPG"~(Sigma*mu),
+       subtitle="Correlation plot",
+       x="Miles per gallon"~(Sigma),
+       y="Weight"~(mu))+
+  scale_shape_manual(values=c(2,4,6),
+                     name="Cylinders"~(delta),
+                     breaks=c("4", "6", "8"),
+                     labels=c("4 Cyl","6 Cyl","8 Cyl"))
+grid.arrange(k,l,m,n,ncol=2)
+```
+
+## formatting your text
+using theme(), you can format your text in your entire figure 
+```{r theme}
+ggplot(cars, aes(mpg, wt, color=as.factor(cyl)))+
+  geom_point()+
+  facet_grid(.~as.factor(cyl))+
+  labs(title="Weight vs MPG",
+       x="Miles per gallon",
+       y="Weight")+
+  scale_colour_manual(values=c("red", "blue", "black"),
+                      name="Cylinders",
+                      breaks=c("4", "6", "8"),
+                      labels=c("4 Cyl", "6 Cyl", "8 Cyl")) +
+  theme(axis.title.x=element_text(size=15,face="bold"),
+        axis.title.y=element_text(size=15,face="bold"),
+        axis.text = element_text(size=10,angle = 90),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(0.25, "cm"),
+        strip.text.x = element_text(size=20,face="italic"),
+        legend.position = c(0.95,0.7),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        panel.spacing = unit(1, "lines"))
+```
+
+## special themes
+```{r themes}
+o <- ggplot(cars, aes(mpg, wt, color=as.factor(cyl)))+
+  geom_point()+
+  theme_bw()
+p <- ggplot(cars, aes(mpg, wt, color=as.factor(cyl)))+
+  geom_point()+
+  theme_classic()
+q <- ggplot(cars, aes(mpg, wt, color=as.factor(cyl)))+
+  geom_point()+
+  theme_grey()
+r <- ggplot(cars, aes(mpg, wt, color=as.factor(cyl)))+
+  geom_point()+
+  theme_light()
+zz <- grid.arrange(o,p,q,r,ncol=2)
+```
+
+## exporting your plots
+use tiff(), bmp(), jpeg(), and png()
+```{r export, echo=TRUE, eval=FALSE}
+jpeg("test.jpg", width = 9, height = 8, units = 'in', res = 300)
+zz
+dev.off()
+```
+
+## Xpose4
+```{r install, echo=TRUE, warning=FALSE}
+#install.packages("xpose4")
+library(xpose4)
+#library(gridExtra)
+```
+
+##building a database
+- If your run number is 001, all your NONMEM output files will end in 001.
+- xpose.data(runno='001')
+- we're going to use the built-in database "simpraz.xpdb"
+```{r database, echo=TRUE}
+xpdb <- simpraz.xpdb
+print(xpdb)
+```
+
+## structure
+str()
+```{r struct, warning=FALSE}
+str(xpdb)
+```
+
+## names
+db.names() tells you a summary of the specified Xpose object to the R console.
+```{r dbnames}
+db.names(xpdb)
+```
+
+## individual plots
+ind.plots(). there will be multiple pages, you can specify which page to show with page=...)
+```{r indplots, warning=FALSE}
+ind.plots(xpdb)
+```
+
+## goodness of fit plots
+basic.gof(xpdb)
+```{r GOF}
+basic.gof(xpdb) 
+```
+
+## more goodness of fit plots
+addit.gof(xpdb)
+```{r GOF2}
+addit.gof(xpdb) 
+```
+
+## DV vs plots
+- dv.vs.idv: dv vs independent var
+- dv.vs.ipred
+- dv.vs.ipred.by.cov: dv vs ipred conditioned on cov's
+- dv.vs.ipred.by.idv
+- dv.vs.pred
+- dv.vs.pred.by.cov
+- dv.vs.pred.by.idv
+- dv.vs.pred.ipred
+
+## DV vs IPRED conditioned on time
+```{r test}
+dv.vs.ipred.by.idv(xpdb)
+```
+
+## DV vs IPRED and PRED
+dv.pres.vs.idv()
+```{r dvipredpred}
+dv.preds.vs.idv(xpdb)
+```
+
+## CWRES plots
+- cwres.dist.hist
+- cwres.dist.qq
+- cwres.vs.cov
+- cwres.vs.idv
+- cwres.vs.idv.bw
+- cwres.vs.pred
+- cwres.vs.pred.bw
+
+## CWRES vs pred
+dv.pres.vs.idv()
+```{r cwres}
+cwres.vs.pred(xpdb)
+```
+
+## covariate distributions
+cov.hist()
+```{r histos1}
+cov.hist(xpdb)
+```
+
+## parameter distributions
+parm.hist()
+```{r histos2}
+parm.hist(xpdb)
+```
+
+## eta distributions
+ranpar.hist()
+```{r histos3}
+ranpar.hist(xpdb)
+```
+
+## covariates on etas
+ranpar.vs.cov()
+```{r coveta}
+ranpar.vs.cov(xpdb)
+```
+
+## VPCs
+- you can only do them if you're:
+1. Using an xpdb containing a simulation and an estimation problem
+2. Using a PsN generated VPC folder
+- refer to xpose4 manual
+
+## comparing models
+- if you have two (nested?) models to compare, basic.model.comp()
+- This creates a stack of four plots, comparing PRED, IPRED, WRES (or CWRES), and IWRES estimates for the two specified model fits.
+- dOFV.vs.id(): most/least influential persons b/w 2 models
+- dOFV.vs.cov(): dOFV change from cov's b/w 2 models
+- dOFV1.vs.dOFV2(): dOFV change b/w 2 models

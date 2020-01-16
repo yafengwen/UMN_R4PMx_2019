@@ -1,0 +1,116 @@
+---
+title: "Session 1: Rmarkdown & Version Control"
+author: "Shen Cheng and Ya-Feng Wen"
+date: "June 14, 2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Acknowledgment
+
+The content of this workshop is largely based on Samuel P Callisto presented in R4PMx Workshop in summer 2018. 
+
+This workshop is supported by UMN ECP Colleagues
+
+## R Markdown
+
+A tool to turn your analyses into high quality documents, reports, presentations and dashboards.
+
+## Create a new R markdown file
+- Open files: Files $\rightarrow$ New files $\rightarrow$ R Markdown
+- Select output files (Documents: html, pdf, word, Presentation: html, pdf, Shiny App)  
+
+## Edit files: title
+- Title for report, author, date and output
+- $\#$title, $\#\#$subtitle, $\#\#\#$...
+
+## Text
+- Line break: space + space + enter
+- Surrounding $\backslash$theta_{ij} with “$\$$” will generate $\theta_{ij}$
+- Making tables
+- $\backslash$new page
+
+## Code chuck
+- r Setup chuck (echo, message, warning, include...)
+- Suggestions from Sam: "I always import ALL datasets and packages in my first chunk of code. This way you don’t need to hunt down the line where data was imported, just re-run the first chunk."
+- Code chuck: in between (eval = FALSE); at the end (eval = TRUE)
+
+## Knit
+
+## Useful keyboard shortcuts
+
+Ctrl-Alt-I: Insert new chunk
+
+Ctrl-Enter: Run current line of code (multiple if highlighted)
+
+Ctrl-Shift-C: Comment/uncomment selected lines
+
+Complete list of shortcuts <https://www.rstudio.com/wp-content/uploads/2016/01/rstudio-IDE-cheatsheet.pdf>
+
+(Mac Users use command instead of Ctrl)
+
+## Resouces
+
+- R Markdown Cheatsheet old version: <https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf>  
+
+- R Markdown Cheatsheet new version: <https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf>  
+
+- R Markdown Reference Guide: <https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf>  
+
+- Latex cheatsheet:<https://wch.github.io/latexsheet/latexsheet-0.png>  
+<https://wch.github.io/latexsheet/latexsheet-1.png>
+
+- Mathematics in R Markdown:<https://www.calvin.edu/~rpruim/courses/s341/S17/from-class/MathinRmd.html>
+
+- Other R Cheatsheet: <https://www.rstudio.com/resources/cheatsheets/>
+
+## RPubs
+
++ A place to share your work or assignment for free.   
++ Example: https://rpubs.com/Statinmylife/473540
+
+## Version control
+
++ Version control is a system that records changes to a file or set of files over time so that you can recall specific versions later.
++ GitHub is an open source version control system (VCS) called Git. 
+
+## Repositories
+Can be either public or private. On github.com with a free account you can ONLY create public repositories. These can be seen by anyone. Enterprise or paid version of GitHub allows you to create private repositories which can only be seen by you and collaborators of your choice.
+
+## UMN Github
+
++ Login <https://github.umn.edu>
++ Login using your Internet ID (X500, not email address) and university password
++ Current University of Minnesota students, faculty, and staff and their sponsors can use an Enterprise version of GitHub through UMN for free.
++ Allows users to have private repositories. Users outside UMN cannot see anything in this account, but you can transfer repositories from the UMN GitHub to a public GitHub account
++ More information, please see the UMN IT page <https://it.umn.edu/git-frequently-asked-questions>
+
+## Github Desktop
+
+Download <https://desktop.github.com/>
+
+Instruction <https://help.github.com/en/desktop/getting-started-with-github-desktop/creating-your-first-repository-using-github-desktop> 
+
+
+## GitHub glossary
+
++ Commit: File changes saved to your local machine
++ Push: File changes saved to your online database
++ Pull: Bring online changes to your local workspace
++ Fork: Create a personal copy of someone else's work
++ Branch: Workspace to try implementing new feature without worrying about messing up existing function
+
+## Reproducibility & Readability
+
++ Tip: Use **camel case** to separate words within a variable name by capitalizing the first letter of a new word, e.g. *baselineData.* This applies not only to coding within R, but also maintaining a proper audit trail for all your files!
+
++ Naming convention: for version control, best method of including dates is to use **yyyymmdd**, as this will sort chronologically when sorted alphabetically
+
++ Always write your code as though it were being read by a human, not a computer!
+
+*In addition to liberal commenting throughout your code, do not underestimate the importance of creating descriptive variable names. If a future graduate student takes over your project after you've graduated, will they be able to decipher what your code does without calling you to ask?
+
+

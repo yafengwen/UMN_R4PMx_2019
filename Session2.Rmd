@@ -1,0 +1,341 @@
+---
+title: "Data Structure, Data Manipulation With Base R Function and Dplyr"
+author: "Shen Cheng & Ya-Feng Wen"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+```
+## Acknowledgement
+The contents and strcuture of this workshop refer a lot to R4PMx Workshop in summer 2018 presented by Samuel P Callisto, Ashwin Karanam and David Margraf. 
+
+## Data types in R  
+There are multiple ways to represent data in R  
+
+- Numbers  
+- Text
+
+## Data types in R
+
+|Data Types|Types of Data Contain|Examples|
+|:-:|:-:|:-:|
+|character |letters and other text characters           |names, addresses          |
+|numeric   |numbers (with decimal points)               |weight, height            |
+|integer   |whole numbers                               |age, SSN                  |
+|logical   |information on true/false questions         |vegetarian or not         |
+|factor    |unordered or ordered categorical information|t-shirt size (S, M, L, XL)|
+
+## Data Types in R 
+- Most of the time we want to work with text as a character because they are easier to manipulate.  
+
+- Numbers can also be treated as a character, but this is typically undesirable because we cannot perform any arithmetic manipulations on numbers when they are in this format.
+
+## Converting between common data types in R
+- as.logical  
+- as.numeric: a <- as.numeric(a)  
+- as.character  
+- as.factor 
+
+## Data Types in R
+```{r}
+var <- as.integer(3)
+str(var)
+```
+
+```{r}
+var2 <- var*2
+str(var2)
+```
+
+```{r}
+var.c <- as.character(var)
+str(var.c)
+```
+
+## Vector
+- Vectors contain the same data type.  
+- Different with list
+```{r}
+vec.1 <- 1:5
+str(vec.1)
+```
+
+```{r}
+vec.2 <- c("a", "b", "c", "d", "e")
+str(vec.2)
+```
+
+```{r}
+vec.3 <- c(TRUE,FALSE,F,F,T)
+str(vec.3)
+```
+
+## data.frame
+- A vector of vectors create a matrix or a data.frame.  
+- Most of the time you will use data.frames to store your data since each vector can contain a different data type.  
+- Matrix: Similar to a data frame, but rows and columns must be the same data type. 
+
+```{r}
+df <- data.frame(vec.1, vec.2, vec.3)
+names(df) <- c("numbers", "letters", "vowels")
+str(df)
+```
+
+## data.frame
+```{r}
+## convert from Factor to character data type
+df$letters <- as.character(df$letters)
+str(df)
+```
+
+## Data Manipulation
+- Various formats of original datasets.   
+- NONMEM or other pharmacometric softwares have specific requirements for data formats. 
+
+## Set Working Directory  
+- Session $\rightarrow$ Set Working Directory $\rightarrow$ Choose Directory   
+- base R function: setwd(), getwd()
+
+## Reading Dataset  
+- read.csv, readxl, read_sas....  
+- read.csv(..., stringAsFactor=TRUE)
+
+## Create New Variables
+```{r, eval=FALSE}
+midwest$ACT_PCARE_HRS <- midwest$ACT_PCARE/60
+Theoph$Time_MIN <- Theoph$Time*60
+```
+
+## Make a sub dataset
+
+```{r, Pick rows}
+Theoph_ID_1 <- subset(Theoph, Theoph$Subject == 1)
+Theoph_ID_2 <- Theoph[Theoph$Subject == 2,]
+Theoph_ID_1_3 <- subset(Theoph, Theoph$Subject == 1 | Theoph$Subject == 3)
+Theoph_ID_2_4 <- Theoph[Theoph$Subject == 2 | Theoph$Subject == 4,]
+```
+```{r, Pick columns}
+Theoph_Time <- as.data.frame(Theoph$Time)
+Theoph_Time <- as.data.frame(Theoph[,4])
+Theoph_Time_conc <- as.data.frame(Theoph[,c(4,5)])
+```
+```{r, Pick rows and columns}
+Theoph_ID1_Time_conc <- as.data.frame(Theoph[Theoph$Subject == 1,c(4,5)])
+```
+
+## Combine dataset
+- cbind  
+- rbind  
+- merge
+
+## Rename and Reorder Variables 
+- colnames(Dataset) <- c()  
+- colnames(Dataset)[which(colnames(Dataset) == "a")] <- b  
+- Dataset <- Dataset[c(var1, var2, var3,....)]
+
+## Save updated dataset
+- write.csv(dataset,'dataset.csv')  
+- Save in working directory
+
+## Resources
+- Base R Cheat Sheet: https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf  
+- The ultimate R Cheat Sheet: https://sites.ualberta.ca/~ahamann/teaching/renr690/R_Cheat_Data.pdf
+
+
+## Tidyverse
+
++ A collection of R packages designed for data science <https://www.tidyverse.org/>
++ Includes: readr, tidyr, dplyr, ggplot2, tibble, purr, stringr, forcats, and others
++ Developed by RStudio and it is openly on GitHub
++ Validate R installations are important for commerical use (such as Pharma)
++ Not a replacement for base R
++ Not a finished thing 
+
+## Data Import (readr)
+
++ Significantly faster
++ More intelligent (dates as dates, and numbers as numbers)
++ Never converts strings to factors
++ Able to import data from SAS, SPSS, and Stata
++ readxl (another package) to import .xls and .xlsx
+
+## Data Format (tidyr)
+
++ Reshaping and transforming data for further manipulation
+
+## Data Wrangle (dplyr)
+
++ Pipe (%>%) operator to provide a logical framework for chaining together common data wrangling tasks
++ For subsetting, filtering, summarizing, and generally wrangling data
++ `filter()` select rows
++ `select()` select variables
++ `rename()` rename variables
++ `mutate()` create new variable
++ `arrange()` order rows by variable
++ `group_by()` group rows by variable
++ `summarise()` aggregate the data
++ `case_when` vectorise multiple if_else() statements
+
+## Pipe (%>%)
+
++ Syntactice sugar: makes code easier to read/write for humans
++ Improving the flow of code
++ Reducing the amount of key strokes needed
++ shortcut: Ctrl + Shift + M (command + shift + M in Mac)
+
+## Examples
+
++ Example: `mean(diff(data))`
+
+```{r, warning=FALSE, message= FALSE}
+
+data <- c(5,7,11,13)
+mean(diff(data))
+
+library(tidyverse) # %>% is not readily available with base R
+
+data %>% 
+  diff %>% # calculate the differences between each number
+  mean() # calculate the mean
+```
+
+
+## Commonly used base R operators
+
++ `==` is equal to
++ `>, >=, <, <=` greater than/less than
++ `!=` is not equal to
++ `is.na()` is missing
++ `between()` within range of numbers (inclusive)
+
+## Select variables of interest
+
++ `starts_with()` select based on prefix
++ `ends_with()` select based on suffix
++ `num_range()` select based on prefix & numeric range
++ `contains()` matches a string within the variable
++ `matches()` more general matching using regular expressions
++ `one_of()` selects columns from a group of names
++ Drop variables: place a minus sign in front of the variable you want to remove `select(df, -Wt)`
++ Rearrange variables: place the `everything()` helper function will fill in the remaining variables you do not mention `select(df, Time, Subject, everything())`
++ Move a variable to the end of the data set: subtract then add it back `select(df, -Wt, weight=Wt)`
+
+## Summarizing data
+
+Any function that returns a single value can be used in summarize().
+
++ `mean()`
++ `median()`
++ `sd()`
++ `min()`, `max()`
++ `cor()`
++ `n()`
++ `n_distinct()`
+
+## Let's Practice 
+
++ Use dataset called "PK Covariates" in the datasets folder (download from UMN GitHub UMN_R4PMx_2019)
++ What are the average weight for smoking and non-smoking individuals and how many subjects in each group?
++ How many individuals has genotype 1 in those who are less than 100 kg and equal or greater to 100 kg?
++ What are the Cmax and Tmax for each individual?
++ What are the average Cmax and Tmax based on genotype and race?
+
+## Load the dataset using readr
+
+```{r}
+# Load the dataset with readr, change column type to factor and set NA value
+covariates <- read_csv("datasets/PK Covariates.csv", 
+    col_types = cols(CMT = col_factor(levels = c("1", 
+        "2")), FED = col_factor(levels = c("0", 
+        "1")), GENO = col_factor(levels = c("0", 
+        "1")), MDV = col_factor(levels = c("0", 
+        "1")), RACE = col_factor(levels = c("0", 
+        "1")), SMOK = col_factor(levels = c("0", 
+        "1"))), na = "-99")
+```
+
+## Several ways to check missing values
+
+```{r, eval=FALSE}
+# searching for every NA and list them, only use for small dataset
+is.na(covariates)  
+which(is.na(covariates))
+
+# for larger dataset, check if there is any missing value
+any(is.na(covariates))  
+sum(is.na(covariates))  # how many NAs
+
+complete.cases(covariates) #Find rows with no missing values
+#Subset data, keeping only complete cases
+df_onlycompleterow <-df[complete.cases(covariates),]  
+# Another way to remove rows with NAs
+df_onlycompleterow_2 <- na.omit(covariates)  
+```
+
+
+## Average weight (Method 1)
+```{r}
+# Average weight for smoking and non-smoking individuals
+covariates %>% 
+  group_by(SMOK) %>% 
+  summarise(mean_wt = mean(WT, na.rm = T), n = n_distinct(ID)) # exclude NA in calculation
+```
+
+## Average weight (Method 2)
+```{r}
+## Filter out missing WT record
+covariates %>% 
+  filter(!is.na(WT)) %>% 
+  group_by(SMOK) %>% 
+  summarise(mean_wt = mean(WT), n = n_distinct(ID))
+```
+
+## Count of individuals has genotype 1 in those who are less than 100 kg and equal or greater to 100 kg
+```{r}
+covariates %>% 
+  mutate(wtLess100 = WT <100) %>% 
+  group_by(wtLess100) %>% 
+  summarise(genoOneCount = n_distinct(GENO))
+```
+
+## Cmax and Tmax for each individual
+
+```{r}
+covariates <- covariates %>% 
+  group_by(ID) %>% 
+  mutate(Cmax = max(CONC),
+         temp = case_when(CONC == Cmax ~ TIME),
+         Tmax = max(temp, na.rm = T)) %>%
+  select(-temp)
+head(covariates[,c(2,3,5,13,14)],n=5)
+```
+
+## Average Cmax and Tmax based on genotype and race
+```{r}
+covariates %>% 
+  group_by(GENO, RACE) %>% 
+  summarise(mean_Cmax = mean(Cmax, na.rm = T), 
+            mean_Tmax = mean(Tmax, na.rm = T))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
